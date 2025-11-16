@@ -9,13 +9,11 @@ import { AuthProvider } from './contexts/AuthContext';
 import { msalInstance } from './lib/msal';
 
 // Global error handlers for unhandled errors
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
+window.addEventListener('unhandledrejection', (_event) => {
   // Here you could send to error reporting service
 });
 
-window.addEventListener('error', (event) => {
-  console.error('Global error:', event.error);
+window.addEventListener('error', (_event) => {
   // Here you could send to error reporting service
 });
 

@@ -4,17 +4,21 @@ import express from 'express';
  * Security headers middleware for Azure AD compliance
  * Implements essential security headers to protect against common web vulnerabilities
  */
-export function securityHeaders(req: express.Request, res: express.Response, next: express.NextFunction) {
+export function securityHeaders(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
   // Content Security Policy - restrict resource loading
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data: https:; " +
-    "font-src 'self'; " +
-    "connect-src 'self' https://login.microsoftonline.com https://graph.microsoft.com; " +
-    "frame-ancestors 'none';"
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: https:; " +
+      "font-src 'self'; " +
+      "connect-src 'self' https://login.microsoftonline.com https://graph.microsoft.com; " +
+      "frame-ancestors 'none';"
   );
 
   // HTTP Strict Transport Security - enforce HTTPS
@@ -44,7 +48,11 @@ export function securityHeaders(req: express.Request, res: express.Response, nex
 /**
  * Additional security headers specifically for authentication endpoints
  */
-export function authSecurityHeaders(req: express.Request, res: express.Response, next: express.NextFunction) {
+export function authSecurityHeaders(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
   // Cache control for auth endpoints - prevent caching of sensitive data
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
@@ -54,13 +62,13 @@ export function authSecurityHeaders(req: express.Request, res: express.Response,
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self'; " +
-    "style-src 'self'; " +
-    "img-src 'self' data: https://login.microsoftonline.com; " +
-    "font-src 'self'; " +
-    "connect-src 'self' https://login.microsoftonline.com https://graph.microsoft.com; " +
-    "frame-ancestors 'none'; " +
-    "form-action 'self' https://login.microsoftonline.com;"
+      "script-src 'self'; " +
+      "style-src 'self'; " +
+      "img-src 'self' data: https://login.microsoftonline.com; " +
+      "font-src 'self'; " +
+      "connect-src 'self' https://login.microsoftonline.com https://graph.microsoft.com; " +
+      "frame-ancestors 'none'; " +
+      "form-action 'self' https://login.microsoftonline.com;"
   );
 
   next();

@@ -79,44 +79,4 @@ export const routes = [
       </ErrorBoundary>
     ),
   },
-  {
-    path: '/modules',
-    element: (
-      <ErrorBoundary>
-        <RootLayout>
-          <Modules />
-        </RootLayout>
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/modules/:id',
-    element: (
-      <ErrorBoundary>
-        <RootLayout>
-          <ModuleDetail />
-        </RootLayout>
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/settings',
-    element: (
-      <ErrorBoundary>
-        <RootLayout>
-          <Settings />
-        </RootLayout>
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '*',
-    element: (
-      <ErrorBoundary>
-        <RootLayout>
-          <NotFound />
-        </RootLayout>
-      </ErrorBoundary>
-    ),
-  },
 ];

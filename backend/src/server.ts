@@ -19,7 +19,10 @@ app.use(express.json());
 
 // CORS configuration for auth endpoints
 const authCorsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+  origin: function (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) {
     // Allow requests with no origin (mobile apps, etc.)
     if (!origin) return callback(null, true);
 
@@ -47,7 +50,10 @@ app.use('/auth', cors(authCorsOptions));
 
 // General CORS for other endpoints (more permissive for development)
 const generalCorsOptions = {
-  origin: process.env.NODE_ENV === 'development' ? true : process.env.ALLOWED_ORIGINS?.split(',') || false,
+  origin:
+    process.env.NODE_ENV === 'development'
+      ? true
+      : process.env.ALLOWED_ORIGINS?.split(',') || false,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -108,7 +114,7 @@ const startServer = async () => {
 
         envConfig = dbConfigSchema.parse(process.env);
         logger.warn('Azure AD configuration missing - auth routes will use development fallbacks', {
-          error: configError instanceof Error ? configError.message : String(configError)
+          error: configError instanceof Error ? configError.message : String(configError),
         });
       } else {
         throw configError;

@@ -25,17 +25,16 @@ function getAuditLogger(): winston.Logger {
           filename: 'logs/auth-audit.log',
           maxsize: 5242880, // 5MB
           maxFiles: 5,
-          tailable: true
+          tailable: true,
         }),
         // Also log to console in development
-        ...(nodeEnv === 'development' ? [
-          new winston.transports.Console({
-            format: winston.format.combine(
-              winston.format.colorize(),
-              winston.format.simple()
-            )
-          })
-        ] : [])
+        ...(nodeEnv === 'development'
+          ? [
+              new winston.transports.Console({
+                format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+              }),
+            ]
+          : []),
       ],
     });
   }
@@ -58,11 +57,7 @@ export enum AuditEventType {
 /**
  * Log an audit event
  */
-export function logAuditEvent(
-  eventType: AuditEventType,
-  details: Record<string, any>,
-  req?: any
-) {
+export function logAuditEvent(eventType: AuditEventType, details: Record<string, any>, req?: any) {
   const auditEntry = {
     eventType,
     timestamp: new Date().toISOString(),
@@ -88,7 +83,9 @@ export function auditAuthMiddleware(req: any, res: any, next: any) {
     const user = req.user;
 
     logAuditEvent(
-      res.statusCode === 200 ? AuditEventType.TOKEN_VALIDATION_SUCCESS : AuditEventType.TOKEN_VALIDATION_FAILURE,
+      res.statusCode === 200
+        ? AuditEventType.TOKEN_VALIDATION_SUCCESS
+        : AuditEventType.TOKEN_VALIDATION_FAILURE,
       {
         statusCode: res.statusCode,
         duration,

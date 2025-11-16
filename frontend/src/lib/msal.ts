@@ -20,7 +20,7 @@ const validateAzureConfig = () => {
   }
 
   if (!apiScope || apiScope.trim() === '') {
-    console.warn('VITE_API_SCOPE is not configured. Using default scope. Please configure your API scope for production use.');
+    // VITE_API_SCOPE is not configured. Using default scope. Please configure your API scope for production use.
   }
 };
 

@@ -1,4 +1,10 @@
 import { Router } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import '../types.d.ts';
+
+interface AuthRequest extends Request {
+  user?: any;
+}
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import rateLimit from 'express-rate-limit';
@@ -90,7 +96,7 @@ function getKey(header: any, callback: any) {
 }
 
 // Middleware to validate Azure AD token
-export async function validateAzureToken(req: any, res: any, next: any) {
+export async function validateAzureToken(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -124,7 +130,7 @@ export async function validateAzureToken(req: any, res: any, next: any) {
   }
 }
 
-router.get('/me', validateAzureToken, async (req, res) => {
+router.get('/me', validateAzureToken, async (req: AuthRequest, res: Response) => {
   try {
     const user = req.user;
 

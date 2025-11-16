@@ -7,9 +7,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Login useEffect: isAuthenticated', isAuthenticated);
     if (isAuthenticated) {
-      console.log('Navigating to /');
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
@@ -17,8 +15,8 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       await login();
-    } catch (error) {
-      console.error('Login failed', error);
+    } catch {
+      // Login failed - error handled by MSAL
     }
   };
 

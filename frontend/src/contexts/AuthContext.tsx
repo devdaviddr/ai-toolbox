@@ -1,5 +1,4 @@
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import type { AuthenticationResult } from '@azure/msal-browser';
+import { createContext, useState, useEffect, type ReactNode } from 'react';
 import { msalInstance, graphScopes, apiScopes } from '../lib/msal';
 
 interface AuthContextType {
@@ -34,9 +33,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUser(accounts[0]);
           }
         }
-      } catch (error) {
-        // MSAL initialization failed - user will need to login
-      } finally {
+       } catch {
+         // MSAL initialization failed - user will need to login
+       } finally {
         setLoading(false);
       }
     };
@@ -74,15 +73,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         // Try silent token acquisition first
         response = await msalInstance.acquireTokenSilent(request);
-      } catch (silentError) {
-        // If silent acquisition fails, try interactive acquisition
-        try {
-          response = await msalInstance.acquireTokenPopup(request);
-        } catch (interactiveError) {
-          // If both fail, user needs to login again
-          throw new Error('Token acquisition failed. Please login again.');
-        }
-      }
+       } catch {
+         // If silent acquisition fails, try interactive acquisition
+         try {
+           response = await msalInstance.acquireTokenPopup(request);
+         } catch {
+           // If both fail, user needs to login again
+           throw new Error('Token acquisition failed. Please login again.');
+         }
+       }
 
       return response.accessToken;
     } catch (error) {

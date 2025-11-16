@@ -68,7 +68,8 @@ describe('Azure AD Configuration Validation', () => {
     process.env.DB_NAME = 'test';
     process.env.AZURE_AUDIENCE = 'api://12345678-1234-1234-1234-123456789abc';
     process.env.AZURE_AUDIENCE_WITH_SCOPE = 'api://12345678-1234-1234-1234-123456789abc';
-    process.env.AZURE_ISSUER = 'https://login.microsoftonline.com/12345678-1234-1234-1234-123456789abc/v2.0';
+    process.env.AZURE_ISSUER =
+      'https://login.microsoftonline.com/12345678-1234-1234-1234-123456789abc/v2.0';
 
     // Test invalid client ID
     process.env.AZURE_CLIENT_ID = 'invalid-uuid';
@@ -107,11 +108,14 @@ describe('Azure AD Configuration Validation', () => {
     process.env.DB_NAME = 'test';
     process.env.AZURE_CLIENT_ID = '12345678-1234-1234-1234-123456789abc';
     process.env.AZURE_TENANT_ID = '12345678-1234-1234-1234-123456789abc';
-    process.env.AZURE_ISSUER = 'https://login.microsoftonline.com/12345678-1234-1234-1234-123456789abc/v2.0';
+    process.env.AZURE_ISSUER =
+      'https://login.microsoftonline.com/12345678-1234-1234-1234-123456789abc/v2.0';
     process.env.AZURE_AUDIENCE_WITH_SCOPE = 'api://12345678-1234-1234-1234-123456789abc';
 
     process.env.AZURE_AUDIENCE = 'invalid-audience';
 
-    expect(() => validateConfig()).toThrow('AZURE_AUDIENCE must be a valid Azure AD application URI');
+    expect(() => validateConfig()).toThrow(
+      'AZURE_AUDIENCE must be a valid Azure AD application URI'
+    );
   });
 });

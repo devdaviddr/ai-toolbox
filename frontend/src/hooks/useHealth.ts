@@ -2,11 +2,31 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 interface HealthData {
-  status: 'healthy' | 'unhealthy';
+  status: 'healthy' | 'unhealthy' | 'rate_limited';
   database: string;
   timestamp: string;
+  metrics?: {
+    uptime?: number;
+    memory?: {
+      heapUsed: number;
+      heapTotal: number;
+      external: number;
+      rss: number;
+    };
+    responseTime?: number;
+    dbResponseTime?: number;
+  };
+  system?: {
+    nodeVersion: string;
+    platform: string;
+    architecture: string;
+    environment: string;
+    hostname: string;
+  };
   testResult?: { test: number };
   error?: string;
+  message?: string;
+  retryAfter?: number;
 }
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';

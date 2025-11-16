@@ -7,7 +7,7 @@ import { useHealth } from '../useHealth';
 
 // Mock axios
 vi.mock('axios');
-const mockedAxios = vi.mocked(axios);
+const mockedAxios = vi.mocked(axios, true);
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

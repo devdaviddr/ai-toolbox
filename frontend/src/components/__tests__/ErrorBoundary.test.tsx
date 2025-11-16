@@ -7,7 +7,7 @@ const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('ErrorBoundary', () => {
   beforeEach(() => {
-    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('DEV', true);
   });
 
   afterEach(() => {
@@ -77,7 +77,7 @@ describe('ErrorBoundary', () => {
   });
 
   it('should not show error details in production mode', () => {
-    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('DEV', false);
 
     const ThrowError = () => {
       throw new Error('Test error');
@@ -103,10 +103,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
-    expect(consoleError).toHaveBeenCalledWith(
-      'ErrorBoundary caught an error:',
-      expect.any(Error),
-      expect.any(Object)
-    );
+    // componentDidCatch is called but doesn't log to console anymore
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 });

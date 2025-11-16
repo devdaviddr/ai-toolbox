@@ -77,7 +77,7 @@ export default function Sidebar() {
       <div className="mt-auto space-y-4">
         <div className="flex items-center justify-center">
           <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:opacity-80 transition-opacity">
-            {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
+            {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'U'}
           </div>
           {isExpanded && <span className="text-white font-medium text-sm ml-3">{user?.name || 'User'}</span>}
         </div>

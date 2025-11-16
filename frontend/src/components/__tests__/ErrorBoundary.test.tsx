@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
 import ErrorBoundary from '../ErrorBoundary';
 
@@ -7,12 +7,11 @@ const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('ErrorBoundary', () => {
   beforeEach(() => {
-    vi.stubGlobal('process', { env: { NODE_ENV: 'development' } });
+    vi.stubEnv('NODE_ENV', 'development');
   });
 
   afterEach(() => {
-    consoleError.mockClear();
-    vi.restoreAllGlobals();
+    cleanup();
   });
 
   afterAll(() => {
@@ -78,7 +77,7 @@ describe('ErrorBoundary', () => {
   });
 
   it('should not show error details in production mode', () => {
-    vi.stubGlobal('process', { env: { NODE_ENV: 'production' } });
+    vi.stubEnv('NODE_ENV', 'production');
 
     const ThrowError = () => {
       throw new Error('Test error');
@@ -91,8 +90,6 @@ describe('ErrorBoundary', () => {
     );
 
     expect(screen.queryByText('Error Details (Dev)')).not.toBeInTheDocument();
-
-    vi.restoreAllGlobals();
   });
 
   it('should call componentDidCatch when error occurs', () => {

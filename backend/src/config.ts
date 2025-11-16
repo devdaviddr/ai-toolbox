@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+// UUID validation regex for Azure AD identifiers (simplified)
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Azure AD URL validation
+const azureUrlRegex = /^https:\/\/login\.microsoftonline\.com\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/v2\.0$/i;
+
 const configSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().int().positive().default(3001),
@@ -8,11 +14,21 @@ const configSchema = z.object({
   DB_PASSWORD: z.string().min(1, 'DB_PASSWORD is required'),
   DB_SERVER: z.string().min(1, 'DB_SERVER is required'),
   DB_NAME: z.string().min(1, 'DB_NAME is required'),
-  AZURE_CLIENT_ID: z.string().min(1, 'AZURE_CLIENT_ID is required'),
-  AZURE_TENANT_ID: z.string().min(1, 'AZURE_TENANT_ID is required'),
-  AZURE_AUDIENCE: z.string().min(1, 'AZURE_AUDIENCE is required'),
-  AZURE_AUDIENCE_WITH_SCOPE: z.string().min(1, 'AZURE_AUDIENCE_WITH_SCOPE is required'),
-  AZURE_ISSUER: z.string().url('AZURE_ISSUER must be a valid URL'),
+  AZURE_CLIENT_ID: z.string()
+    .min(1, 'AZURE_CLIENT_ID is required')
+    .regex(uuidRegex, 'AZURE_CLIENT_ID must be a valid UUID'),
+  AZURE_TENANT_ID: z.string()
+    .min(1, 'AZURE_TENANT_ID is required')
+    .regex(uuidRegex, 'AZURE_TENANT_ID must be a valid UUID'),
+  AZURE_AUDIENCE: z.string()
+    .min(1, 'AZURE_AUDIENCE is required')
+    .refine((val) => val.startsWith('api://') || val.includes('.onmicrosoft.com'), 'AZURE_AUDIENCE must be a valid Azure AD application URI'),
+  AZURE_AUDIENCE_WITH_SCOPE: z.string()
+    .min(1, 'AZURE_AUDIENCE_WITH_SCOPE is required')
+    .refine((val) => val.startsWith('api://') || val.includes('.onmicrosoft.com'), 'AZURE_AUDIENCE_WITH_SCOPE must be a valid Azure AD application URI'),
+  AZURE_ISSUER: z.string()
+    .url('AZURE_ISSUER must be a valid URL')
+    .regex(azureUrlRegex, 'AZURE_ISSUER must be a valid Azure AD v2.0 issuer URL'),
 });
 
 export type Config = z.infer<typeof configSchema>;

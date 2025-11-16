@@ -53,8 +53,9 @@ describe('API Endpoints - Integration Tests', () => {
 
       expect(response.body.status).toBe('healthy');
       expect(response.body.database).toBe('connected');
-      expect(response.body.testResult).toEqual({ test: 1 });
       expect(response.body.timestamp).toBeDefined();
+      // testResult is no longer included for security reasons
+      expect(response.body).not.toHaveProperty('testResult');
     });
 
     it('should return unhealthy status when database query fails', async () => {
@@ -66,8 +67,9 @@ describe('API Endpoints - Integration Tests', () => {
 
       expect(response.body.status).toBe('unhealthy');
       expect(response.body.database).toBe('disconnected');
-      expect(response.body.error).toBe('Database connection failed');
       expect(response.body.timestamp).toBeDefined();
+      // Error details are not exposed in test environment (NODE_ENV=test)
+      expect(response.body).not.toHaveProperty('error');
     });
 
     it('should handle connection timeout errors', async () => {
@@ -77,7 +79,35 @@ describe('API Endpoints - Integration Tests', () => {
       const response = await request(app).get('/health').expect(500);
 
       expect(response.body.status).toBe('unhealthy');
-      expect(response.body.error).toBe('Connection timeout');
+      // Error details are not exposed in test environment
+      expect(response.body).not.toHaveProperty('error');
+    });
+
+    it('should implement rate limiting for health endpoint', async () => {
+      // Mock successful database query for all requests
+      mockedSql.query.mockResolvedValue({
+        recordset: [{ test: 1 }],
+      } as any);
+
+      // Make multiple requests to trigger rate limiting
+      // Health endpoint allows 10 requests per minute
+      let rateLimitedCount = 0;
+      for (let i = 0; i < 15; i++) {
+        const response = await request(app).get('/health');
+        if (response.status === 200) {
+          expect(response.body.status).toBe('healthy');
+        } else if (response.status === 429) {
+          expect(response.body.status).toBe('rate_limited');
+          expect(response.body.message).toBe('Too many health check requests');
+          expect(response.body.retryAfter).toBeDefined();
+          rateLimitedCount++;
+        } else {
+          fail(`Unexpected status code: ${response.status}`);
+        }
+      }
+
+      // Should have some rate limiting triggered
+      expect(rateLimitedCount).toBeGreaterThan(0);
     });
   });
 

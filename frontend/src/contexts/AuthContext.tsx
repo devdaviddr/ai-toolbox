@@ -26,20 +26,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         await msalInstance.initialize();
         const response = await msalInstance.handleRedirectPromise();
-        console.log('MSAL redirect response', response);
         if (response) {
           setUser(response.account);
-          console.log('User set from redirect', response.account);
         } else {
           const accounts = msalInstance.getAllAccounts();
-          console.log('MSAL accounts', accounts);
           if (accounts.length > 0) {
             setUser(accounts[0]);
-            console.log('User set from accounts', accounts[0]);
           }
         }
       } catch (error) {
-        console.error('MSAL initialization failed', error);
+        // MSAL initialization failed - user will need to login
       } finally {
         setLoading(false);
       }
@@ -71,12 +67,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const request = {
         scopes: apiScopes,
         account: accounts[0],
+        forceRefresh: false, // Allow cached tokens
       };
 
-      const response = await msalInstance.acquireTokenSilent(request);
+      let response;
+      try {
+        // Try silent token acquisition first
+        response = await msalInstance.acquireTokenSilent(request);
+      } catch (silentError) {
+        // If silent acquisition fails, try interactive acquisition
+        try {
+          response = await msalInstance.acquireTokenPopup(request);
+        } catch (interactiveError) {
+          // If both fail, user needs to login again
+          throw new Error('Token acquisition failed. Please login again.');
+        }
+      }
+
       return response.accessToken;
     } catch (error) {
-      console.error('Failed to get access token', error);
+      // Clear user state on token failure
+      setUser(null);
       throw error;
     }
   };

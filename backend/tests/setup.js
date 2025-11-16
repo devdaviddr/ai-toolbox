@@ -9,6 +9,13 @@ process.env.DB_NAME = 'testdb';
 process.env.PORT = '3001';
 process.env.LOG_LEVEL = 'error';
 
+// Azure AD test configuration - using valid UUIDs
+process.env.AZURE_CLIENT_ID = '550e8400-e29b-41d4-a716-446655440000';
+process.env.AZURE_TENANT_ID = '550e8400-e29b-41d4-a716-446655440001';
+process.env.AZURE_AUDIENCE = 'api://550e8400-e29b-41d4-a716-446655440000';
+process.env.AZURE_AUDIENCE_WITH_SCOPE = 'api://550e8400-e29b-41d4-a716-446655440000';
+process.env.AZURE_ISSUER = 'https://login.microsoftonline.com/550e8400-e29b-41d4-a716-446655440001/v2.0';
+
 // Mock MSSQL
 jest.mock('mssql', () => ({
   ConnectionPool: jest.fn(),

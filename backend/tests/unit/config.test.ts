@@ -22,6 +22,11 @@ describe('Config Validation', () => {
       expect(config).toHaveProperty('DB_NAME');
       expect(config).toHaveProperty('NODE_ENV');
       expect(config).toHaveProperty('PORT');
+      expect(config).toHaveProperty('AZURE_CLIENT_ID');
+      expect(config).toHaveProperty('AZURE_TENANT_ID');
+      expect(config).toHaveProperty('AZURE_AUDIENCE');
+      expect(config).toHaveProperty('AZURE_AUDIENCE_WITH_SCOPE');
+      expect(config).toHaveProperty('AZURE_ISSUER');
     });
 
     it('should use test environment by default', () => {
@@ -115,6 +120,11 @@ describe('Config Validation', () => {
         'DB_PASSWORD',
         'DB_SERVER',
         'DB_NAME',
+        'AZURE_CLIENT_ID',
+        'AZURE_TENANT_ID',
+        'AZURE_AUDIENCE',
+        'AZURE_AUDIENCE_WITH_SCOPE',
+        'AZURE_ISSUER',
       ];
 
       for (const prop of requiredProperties) {

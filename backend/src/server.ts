@@ -8,7 +8,7 @@ import logger from './logger.js';
 import { validateConfig } from './config.js';
 
 const app = express();
-const port = process.env.PORT || 3001;
+// Note: port is read from environment and used in startServer function
 
 // Middleware
 app.use(express.json());
@@ -22,11 +22,16 @@ app.get('/', (req, res) => {
 app.get('/health', checkHealth);
 
 // Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error:', { error: err.message, stack: err.stack, url: req.url, method: req.method });
+app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error('Unhandled error:', {
+    error: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+  });
   res.status(500).json({
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
   });
 });
 
@@ -34,7 +39,7 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({
     error: 'Not found',
-    message: `Route ${req.method} ${req.path} not found`
+    message: `Route ${req.method} ${req.path} not found`,
   });
 });
 
@@ -58,16 +63,24 @@ const startServer = async () => {
     };
 
     await initializeDatabase();
-    
+
     // Connect to MSSQL
     await sql.connect(sqlConfig);
-    logger.info('Connected to MSSQL database', { database: envConfig.DB_NAME, server: envConfig.DB_SERVER });
+    logger.info('Connected to MSSQL database', {
+      database: envConfig.DB_NAME,
+      server: envConfig.DB_SERVER,
+    });
 
     app.listen(envConfig.PORT, () => {
-      logger.info('Server started successfully', { port: envConfig.PORT, environment: envConfig.NODE_ENV });
+      logger.info('Server started successfully', {
+        port: envConfig.PORT,
+        environment: envConfig.NODE_ENV,
+      });
     });
   } catch (error) {
-    logger.error('Failed to start server', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('Failed to start server', {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exit(1);
   }
 };

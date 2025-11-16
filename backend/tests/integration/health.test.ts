@@ -19,7 +19,7 @@ describe('API Endpoints - Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     app = createTestApp();
-    
+
     // Register routes
     app.get('/', (req, res) => {
       res.send('Backend API is running');
@@ -28,7 +28,7 @@ describe('API Endpoints - Integration Tests', () => {
     app.post('/test-json', (req, res) => {
       res.json({ received: req.body });
     });
-    
+
     // Add error handling last
     addErrorHandling(app);
   });

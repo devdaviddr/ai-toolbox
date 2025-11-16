@@ -31,6 +31,8 @@ export const initializeDatabase = async () => {
     await pool.close();
     logger.info('Database initialization complete');
   } catch (error) {
-    logger.error('Database initialization failed', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('Database initialization failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 };

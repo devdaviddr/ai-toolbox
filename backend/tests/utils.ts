@@ -29,19 +29,24 @@ export function addErrorHandling(app: Express): void {
   });
 
   // Error handler (must be last)
-  app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('Unhandled error:', err);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
-    });
-  });
+  app.use(
+    (err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      console.error('Unhandled error:', err);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
+      });
+    }
+  );
 }
 
 /**
  * Starts a test server and returns it with a cleanup function
  */
-export async function startTestServer(app: Express, port: number = 0): Promise<{ server: Server; port: number; close: () => Promise<void> }> {
+export async function startTestServer(
+  app: Express,
+  port: number = 0
+): Promise<{ server: Server; port: number; close: () => Promise<void> }> {
   return new Promise((resolve) => {
     const server = app.listen(port, () => {
       const assignedPort = (server.address() as any).port;

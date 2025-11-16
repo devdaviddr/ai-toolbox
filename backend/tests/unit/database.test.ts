@@ -184,53 +184,53 @@ describe('Database Module', () => {
     });
   });
 });
-  describe('getInitConfig', () => {
-    it('should return config with environment variables when set', () => {
-      const config = getInitConfig();
-      
-      expect(config.user).toBe(process.env.DB_USER);
-      expect(config.password).toBe(process.env.DB_PASSWORD);
-      expect(config.server).toBe(process.env.DB_SERVER);
-      expect(config.database).toBe('master');
-    });
+describe('getInitConfig', () => {
+  it('should return config with environment variables when set', () => {
+    const config = getInitConfig();
 
-    it('should use default user when DB_USER is not set', () => {
-      const originalUser = process.env.DB_USER;
-      delete process.env.DB_USER;
-      
-      const config = getInitConfig();
-      expect(config.user).toBe('sa');
-      
-      if (originalUser) process.env.DB_USER = originalUser;
-    });
-
-    it('should use default password when DB_PASSWORD is not set', () => {
-      const originalPassword = process.env.DB_PASSWORD;
-      delete process.env.DB_PASSWORD;
-      
-      const config = getInitConfig();
-      expect(config.password).toBe('Password123!');
-      
-      if (originalPassword) process.env.DB_PASSWORD = originalPassword;
-    });
-
-    it('should use default server when DB_SERVER is not set', () => {
-      const originalServer = process.env.DB_SERVER;
-      delete process.env.DB_SERVER;
-      
-      const config = getInitConfig();
-      expect(config.server).toBe('localhost');
-      
-      if (originalServer) process.env.DB_SERVER = originalServer;
-    });
-
-    it('should have encryption enabled', () => {
-      const config = getInitConfig();
-      expect(config.options?.encrypt).toBe(true);
-    });
-
-    it('should trust self-signed certificates', () => {
-      const config = getInitConfig();
-      expect(config.options?.trustServerCertificate).toBe(true);
-    });
+    expect(config.user).toBe(process.env.DB_USER);
+    expect(config.password).toBe(process.env.DB_PASSWORD);
+    expect(config.server).toBe(process.env.DB_SERVER);
+    expect(config.database).toBe('master');
   });
+
+  it('should use default user when DB_USER is not set', () => {
+    const originalUser = process.env.DB_USER;
+    delete process.env.DB_USER;
+
+    const config = getInitConfig();
+    expect(config.user).toBe('sa');
+
+    if (originalUser) process.env.DB_USER = originalUser;
+  });
+
+  it('should use default password when DB_PASSWORD is not set', () => {
+    const originalPassword = process.env.DB_PASSWORD;
+    delete process.env.DB_PASSWORD;
+
+    const config = getInitConfig();
+    expect(config.password).toBe('Password123!');
+
+    if (originalPassword) process.env.DB_PASSWORD = originalPassword;
+  });
+
+  it('should use default server when DB_SERVER is not set', () => {
+    const originalServer = process.env.DB_SERVER;
+    delete process.env.DB_SERVER;
+
+    const config = getInitConfig();
+    expect(config.server).toBe('localhost');
+
+    if (originalServer) process.env.DB_SERVER = originalServer;
+  });
+
+  it('should have encryption enabled', () => {
+    const config = getInitConfig();
+    expect(config.options?.encrypt).toBe(true);
+  });
+
+  it('should trust self-signed certificates', () => {
+    const config = getInitConfig();
+    expect(config.options?.trustServerCertificate).toBe(true);
+  });
+});

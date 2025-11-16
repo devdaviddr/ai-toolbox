@@ -17,7 +17,9 @@ export function validateConfig(): Config {
     return configSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errors = error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
+      const errors = error.issues
+        .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+        .join(', ');
       throw new Error(`Configuration validation failed: ${errors}`);
     }
     throw error;

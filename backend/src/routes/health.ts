@@ -10,15 +10,15 @@ export const checkHealth = async (req: Request, res: Response) => {
       status: 'healthy',
       database: 'connected',
       timestamp: new Date().toISOString(),
-      testResult: result.recordset[0]
+      testResult: result.recordset[0],
     });
-   } catch (error: any) {
+  } catch (error: any) {
     logger.error('Health check failed', { error: error.message, stack: error.stack });
     res.status(500).json({
       status: 'unhealthy',
       database: 'disconnected',
       timestamp: new Date().toISOString(),
-      error: error.message
+      error: error.message,
     });
   }
 };

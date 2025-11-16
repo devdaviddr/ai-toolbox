@@ -1,19 +1,22 @@
 import sql from 'mssql';
 import logger from '../logger.js';
 
-const initConfig: sql.config = {
-  user: process.env.DB_USER || 'sa',
-  password: process.env.DB_PASSWORD || 'Password123!',
-  server: process.env.DB_SERVER || 'localhost',
-  database: 'master', // Connect to master to create the database
-  options: {
-    encrypt: true,
-    trustServerCertificate: true,
-  },
-};
+export function getInitConfig(): sql.config {
+  return {
+    user: process.env.DB_USER || 'sa',
+    password: process.env.DB_PASSWORD || 'Password123!',
+    server: process.env.DB_SERVER || 'localhost',
+    database: 'master', // Connect to master to create the database
+    options: {
+      encrypt: true,
+      trustServerCertificate: true,
+    },
+  };
+}
 
 export const initializeDatabase = async () => {
   try {
+    const initConfig = getInitConfig();
     const pool = new sql.ConnectionPool(initConfig);
     await pool.connect();
 

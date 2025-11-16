@@ -511,10 +511,6 @@ docker-compose down
 4. Commit: `git commit -m "Add my feature"`
 5. Push and create a pull request
 
-## 📝 License
-
-This project is licensed under the ISC License.
-
 ## 🎯 Next Steps
 
 - [ ] Set up CI/CD pipeline (GitHub Actions)

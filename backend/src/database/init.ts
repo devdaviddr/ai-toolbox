@@ -1,4 +1,5 @@
 import sql from 'mssql';
+import logger from '../logger';
 
 const initConfig: sql.config = {
   user: process.env.DB_USER || 'sa',
@@ -25,8 +26,8 @@ export const initializeDatabase = async () => {
     `);
 
     await pool.close();
-    console.log('Database initialization complete');
+    logger.info('Database initialization complete');
   } catch (error) {
-    console.error('Database initialization failed:', error);
+    logger.error('Database initialization failed', { error: error instanceof Error ? error.message : String(error) });
   }
 };

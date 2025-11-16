@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project uses Jest for comprehensive testing with mocked database connections. Tests are fast, isolated, and don't require a running database.
+This project uses Jest for comprehensive testing with mocked database connections. Tests are fast, isolated, and don't require a running database. Logger is automatically suppressed during testing for cleaner output.
 
 ## Running Tests
 

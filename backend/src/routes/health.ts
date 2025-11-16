@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import sql from 'mssql';
+import logger from '../logger';
 
 export const checkHealth = async (req: Request, res: Response) => {
   try {
@@ -11,8 +12,8 @@ export const checkHealth = async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       testResult: result.recordset[0]
     });
-  } catch (error: any) {
-    console.error('Health check failed:', error);
+   } catch (error: any) {
+    logger.error('Health check failed', { error: error.message, stack: error.stack });
     res.status(500).json({
       status: 'unhealthy',
       database: 'disconnected',

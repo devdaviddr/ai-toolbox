@@ -5,7 +5,7 @@ const Health = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-r from-blue-900/40 to-blue-800/40 border border-blue-500/30 rounded-lg p-4">
+      <div data-testid="health-component" className="bg-gradient-to-r from-blue-900/40 to-blue-800/40 border border-blue-500/30 rounded-lg p-4">
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0">
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-400 border-t-transparent"></div>
@@ -18,7 +18,7 @@ const Health = () => {
 
   if (error) {
     return (
-      <div className="bg-gradient-to-r from-red-900/40 to-red-800/40 border border-red-500/30 rounded-lg p-4">
+      <div data-testid="health-component" className="bg-gradient-to-r from-red-900/40 to-red-800/40 border border-red-500/30 rounded-lg p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1">
             <span className="text-2xl">❌</span>
@@ -42,6 +42,7 @@ const Health = () => {
 
   return (
     <div
+      data-testid="health-component"
       className={`rounded-lg p-4 transition-all duration-300 ${
         isHealthy
           ? 'bg-gradient-to-r from-green-900/40 to-emerald-800/40 border border-green-500/30'

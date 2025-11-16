@@ -1,5 +1,6 @@
 import { RootLayout } from '../components/Layout';
 import ErrorBoundary from '../components/ErrorBoundary';
+import ProtectedRoute from '../components/ProtectedRoute';
 import { lazy } from 'react';
 
 const Dashboard = lazy(() => import('../pages/Dashboard'));
@@ -22,9 +23,59 @@ export const routes = [
     path: '/',
     element: (
       <ErrorBoundary>
-        <RootLayout>
-          <Dashboard />
-        </RootLayout>
+        <ProtectedRoute>
+          <RootLayout>
+            <Dashboard />
+          </RootLayout>
+        </ProtectedRoute>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/modules',
+    element: (
+      <ErrorBoundary>
+        <ProtectedRoute>
+          <RootLayout>
+            <Modules />
+          </RootLayout>
+        </ProtectedRoute>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/modules/:id',
+    element: (
+      <ErrorBoundary>
+        <ProtectedRoute>
+          <RootLayout>
+            <ModuleDetail />
+          </RootLayout>
+        </ProtectedRoute>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/settings',
+    element: (
+      <ErrorBoundary>
+        <ProtectedRoute>
+          <RootLayout>
+            <Settings />
+          </RootLayout>
+        </ProtectedRoute>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '*',
+    element: (
+      <ErrorBoundary>
+        <ProtectedRoute>
+          <RootLayout>
+            <NotFound />
+          </RootLayout>
+        </ProtectedRoute>
       </ErrorBoundary>
     ),
   },

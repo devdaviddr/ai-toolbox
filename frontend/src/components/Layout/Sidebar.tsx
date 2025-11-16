@@ -1,14 +1,16 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, memo, type ComponentType, type SVGProps } from 'react';
 import { MdHome, MdViewModule, MdSettings, MdLogout } from 'react-icons/md';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
+    logout();
     navigate('/login');
   };
 
@@ -75,9 +77,9 @@ export default function Sidebar() {
       <div className="mt-auto space-y-4">
         <div className="flex items-center justify-center">
           <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:opacity-80 transition-opacity">
-            U
+            {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
           </div>
-          {isExpanded && <span className="text-white font-medium text-sm ml-3">John Doe</span>}
+          {isExpanded && <span className="text-white font-medium text-sm ml-3">{user?.name || 'User'}</span>}
         </div>
         <button
           onClick={handleLogout}

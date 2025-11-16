@@ -8,6 +8,11 @@ const configSchema = z.object({
   DB_PASSWORD: z.string().min(1, 'DB_PASSWORD is required'),
   DB_SERVER: z.string().min(1, 'DB_SERVER is required'),
   DB_NAME: z.string().min(1, 'DB_NAME is required'),
+  AZURE_CLIENT_ID: z.string().min(1, 'AZURE_CLIENT_ID is required'),
+  AZURE_TENANT_ID: z.string().min(1, 'AZURE_TENANT_ID is required'),
+  AZURE_AUDIENCE: z.string().min(1, 'AZURE_AUDIENCE is required'),
+  AZURE_AUDIENCE_WITH_SCOPE: z.string().min(1, 'AZURE_AUDIENCE_WITH_SCOPE is required'),
+  AZURE_ISSUER: z.string().url('AZURE_ISSUER must be a valid URL'),
 });
 
 export type Config = z.infer<typeof configSchema>;

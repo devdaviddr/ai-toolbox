@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import sql from 'mssql';
 import { checkHealth } from './routes/health.js';
+import authRoutes from './routes/auth.js';
 import { initializeDatabase } from './database/init.js';
 import logger from './logger.js';
 import { validateConfig } from './config.js';
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', checkHealth);
+app.use('/auth', authRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {

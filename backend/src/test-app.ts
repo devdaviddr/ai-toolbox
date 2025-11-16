@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { checkHealth } from './routes/health';
+import { checkHealth } from './routes/health.js';
 
 const app = express();
 

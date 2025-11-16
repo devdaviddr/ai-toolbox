@@ -2,10 +2,10 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import sql from 'mssql';
-import { checkHealth } from './routes/health';
-import { initializeDatabase } from './database/init';
-import logger from './logger';
-import { validateConfig } from './config';
+import { checkHealth } from './routes/health.js';
+import { initializeDatabase } from './database/init.js';
+import logger from './logger.js';
+import { validateConfig } from './config.js';
 
 const app = express();
 const port = process.env.PORT || 3001;

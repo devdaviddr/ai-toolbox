@@ -1,4 +1,4 @@
-import { validateConfig, type Config } from '../../src/config';
+import { validateConfig, type Config } from '../../src/config.js';
 
 describe('Config Validation', () => {
   const originalEnv = process.env;

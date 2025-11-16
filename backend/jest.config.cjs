@@ -25,8 +25,12 @@ module.exports = {
         module: 'ESNext',
         target: 'ES2017',
         esModuleInterop: true,
+        verbatimModuleSyntax: false,
       },
     }],
+  },
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['ts', 'js'],

@@ -7,9 +7,9 @@ jest.mock('mssql', () => ({
 
 import express from 'express';
 import request from 'supertest';
-import { checkHealth } from '../../src/routes/health';
+import { checkHealth } from '../../src/routes/health.js';
 import sql from 'mssql';
-import { createTestApp, addErrorHandling } from '../utils';
+import { createTestApp, addErrorHandling } from '../utils.js';
 
 const mockedSql = sql as jest.Mocked<typeof sql>;
 

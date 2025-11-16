@@ -6,7 +6,7 @@ jest.mock('mssql', () => ({
 }));
 
 import sql from 'mssql';
-import { initializeDatabase } from '../../src/database/init';
+import { initializeDatabase } from '../../src/database/init.js';
 
 const mockedSql = sql as jest.Mocked<typeof sql>;
 

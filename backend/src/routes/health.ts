@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import sql from 'mssql';
-import logger from '../logger';
+import logger from '../logger.js';
 
 export const checkHealth = async (req: Request, res: Response) => {
   try {

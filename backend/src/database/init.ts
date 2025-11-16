@@ -1,5 +1,5 @@
 import sql from 'mssql';
-import logger from '../logger';
+import logger from '../logger.js';
 
 const initConfig: sql.config = {
   user: process.env.DB_USER || 'sa',

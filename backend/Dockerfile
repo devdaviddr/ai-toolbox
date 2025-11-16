@@ -9,6 +9,10 @@ RUN apk add --no-cache curl
 COPY package*.json ./
 COPY tsconfig.json ./
 
+# Copy config files
+COPY eslint.config.js ./
+COPY .prettierrc.json ./
+
 # Install all dependencies (including dev)
 RUN npm install
 

@@ -74,7 +74,7 @@ export default function Settings() {
           aria-label="Settings tabs"
           onActiveTabChange={setActiveTab}
           variant="underline"
-          className="transition-all duration-300"
+          className="transition-all duration-300 [&_[role='tab'][aria-selected='true']]:!text-white [&_[role='tab'][aria-selected='true']]:!font-bold [&_[role='tab']]:!text-slate-400 [&_[role='tab']]:hover:!text-slate-300 [&_[role='tab'][aria-selected='true']]:!border-blue-500"
         >
           <TabItem
             title="System Status"

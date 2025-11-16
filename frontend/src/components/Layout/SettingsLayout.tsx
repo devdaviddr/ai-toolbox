@@ -1,5 +1,4 @@
 import { Outlet } from 'react-router-dom';
-import SettingsTabs from '../SettingsTabs';
 
 export default function SettingsLayout() {
   return (
@@ -8,8 +7,6 @@ export default function SettingsLayout() {
         <h1 className="text-4xl font-bold text-white mb-2">Settings</h1>
         <p className="text-slate-300 text-lg">System configuration and status</p>
       </div>
-
-      <SettingsTabs />
 
       <Outlet />
     </div>

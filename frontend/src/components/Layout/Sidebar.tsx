@@ -42,7 +42,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`hidden md:flex bg-slate-950 border-r border-slate-700 flex-col items-center py-4 transition-all duration-300 ${
+      className={`hidden md:flex bg-slate-950 border-r border-slate-700 flex-col items-center py-4 h-screen transition-all duration-300 ${
         isExpanded ? 'w-48' : 'w-16'
       }`}
     >
@@ -62,7 +62,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-4 flex-grow" role="navigation" aria-label="Main navigation">
+      <nav className="flex flex-col gap-4" role="navigation" aria-label="Main navigation">
         {navItems.map((item) => (
           <NavItem
             key={item.to}

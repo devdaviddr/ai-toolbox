@@ -33,3 +33,7 @@ logs
 # Database
 mssql-data/
 backend/node_modules
+-e 
+# Playwright
+playwright-report/
+test-results/

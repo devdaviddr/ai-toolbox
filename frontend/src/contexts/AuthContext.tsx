@@ -1,13 +1,16 @@
 import { createContext, useState, useEffect, type ReactNode } from 'react';
 import { msalInstance, graphScopes, apiScopes } from '../lib/msal';
+import { userService, type User } from '../services/userService';
 
-interface AuthContextType {
+export interface AuthContextType {
   user: any;
+  userProfile: User | null;
   login: () => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
   getAccessToken: () => Promise<string>;
+  syncUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,7 +21,20 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const syncUser = async () => {
+    try {
+      if (user) {
+        const syncedUser = await userService.syncUser();
+        setUserProfile(syncedUser);
+      }
+    } catch (error) {
+      console.warn('User sync failed:', error);
+      // Don't throw - sync failures shouldn't break the app
+    }
+  };
 
   useEffect(() => {
     const initializeMsal = async () => {
@@ -27,15 +43,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const response = await msalInstance.handleRedirectPromise();
         if (response) {
           setUser(response.account);
+          // Sync user to database after successful login
+          setTimeout(() => syncUser(), 100); // Small delay to ensure state is set
         } else {
           const accounts = msalInstance.getAllAccounts();
           if (accounts.length > 0) {
             setUser(accounts[0]);
+            // Sync user to database on app load
+            setTimeout(() => syncUser(), 100);
           }
         }
-       } catch {
-         // MSAL initialization failed - user will need to login
-       } finally {
+      } catch {
+        // MSAL initialization failed - user will need to login
+      } finally {
         setLoading(false);
       }
     };
@@ -94,7 +114,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, loading, getAccessToken }}>
+    <AuthContext.Provider value={{
+      user,
+      userProfile,
+      login,
+      logout,
+      isAuthenticated,
+      loading,
+      getAccessToken,
+      syncUser
+    }}>
       {children}
     </AuthContext.Provider>
   );

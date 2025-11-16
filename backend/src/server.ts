@@ -5,6 +5,7 @@ import sql from 'mssql';
 import z from 'zod';
 import { checkHealth } from './routes/health.js';
 import authRoutes from './routes/auth.js';
+import userRoutes from './routes/users.js';
 import { initializeDatabase } from './database/init.js';
 import logger from './logger.js';
 import { validateConfig } from './config.js';
@@ -68,6 +69,7 @@ app.get('/', (req, res) => {
 
 app.get('/health', checkHealth);
 app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {

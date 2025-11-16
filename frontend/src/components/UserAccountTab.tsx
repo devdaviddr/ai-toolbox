@@ -4,6 +4,7 @@ import { AuthContext } from '../contexts/AuthContext';
 const UserAccountTab = () => {
   const auth = useContext(AuthContext);
   const [isRefreshingToken, setIsRefreshingToken] = useState(false);
+  const [isRefreshingProfile, setIsRefreshingProfile] = useState(false);
 
   if (!auth) {
     return (
@@ -16,7 +17,7 @@ const UserAccountTab = () => {
     );
   }
 
-  const { user, logout, loading, getAccessToken } = auth;
+  const { user, userProfile, logout, loading, getAccessToken, syncUser } = auth;
 
   if (loading) {
     return (
@@ -44,8 +45,8 @@ const UserAccountTab = () => {
   }
 
   const claims = user.idTokenClaims || {};
-  const displayName = claims.name || 'Unknown User';
-  const email = claims.preferred_username || claims.email || 'No email';
+  const displayName = userProfile?.name || claims.name || 'Unknown User';
+  const email = userProfile?.email || claims.preferred_username || claims.email || 'No email';
   const initials = displayName
     .split(' ')
     .map((n: string) => n[0])
@@ -62,6 +63,17 @@ const UserAccountTab = () => {
       // Error is handled by getAccessToken, no need to log here
     } finally {
       setIsRefreshingToken(false);
+    }
+  };
+
+  const handleRefreshProfile = async () => {
+    setIsRefreshingProfile(true);
+    try {
+      await syncUser();
+    } catch (error) {
+      console.error('Failed to refresh user profile:', error);
+    } finally {
+      setIsRefreshingProfile(false);
     }
   };
 
@@ -84,7 +96,7 @@ const UserAccountTab = () => {
         </div>
 
         {/* Account Management Actions */}
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={handleRefreshToken}
             disabled={isRefreshingToken}
@@ -98,6 +110,22 @@ const UserAccountTab = () => {
             ) : (
               <>
                 🔄 Refresh Token
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleRefreshProfile}
+            disabled={isRefreshingProfile}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2"
+          >
+            {isRefreshingProfile ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                Syncing...
+              </>
+            ) : (
+              <>
+                🔄 Sync Profile
               </>
             )}
           </button>
@@ -180,11 +208,74 @@ const UserAccountTab = () => {
             <p className="text-white bg-slate-700 px-3 py-2 rounded">
               {user.authorityType || 'Azure AD'}
             </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Roles and Permissions */}
+        {/* Database User Profile */}
+      {userProfile && (
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <span className="w-3 h-3 bg-cyan-500 rounded-full"></span>
+            Database Profile
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Object ID (Primary Key)
+              </label>
+              <p className="text-white bg-slate-700 px-3 py-2 rounded font-mono text-sm break-all">
+                {userProfile.oid}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                First Login
+              </label>
+              <p className="text-white bg-slate-700 px-3 py-2 rounded">
+                {new Date(userProfile.first_login).toLocaleString()}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Last Login
+              </label>
+              <p className="text-white bg-slate-700 px-3 py-2 rounded">
+                {new Date(userProfile.last_login).toLocaleString()}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Account Created
+              </label>
+              <p className="text-white bg-slate-700 px-3 py-2 rounded">
+                {userProfile.created_at ? new Date(userProfile.created_at).toLocaleString() : 'N/A'}
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Database Roles
+              </label>
+              {userProfile.roles && userProfile.roles.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {userProfile.roles.map((role: string, index: number) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-cyan-600 text-cyan-100 text-sm rounded-full"
+                    >
+                      {role}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-slate-400 bg-slate-700 px-3 py-2 rounded">
+                  No database roles assigned
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>

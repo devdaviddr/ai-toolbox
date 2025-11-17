@@ -5,17 +5,19 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
-      - MSSQL_PID=Developer
+      - MSSQL_PID=Express
     ports:
       - "1433:1433"
     volumes:
-      - mssql-data:/var/opt/mssql
+      - mssql-prod-data:/var/opt/mssql
+      - ./backend/src/database/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${DB_PASSWORD}" -C -Q "SELECT 1" || exit 1
       interval: 10s
       timeout: 3s
       retries: 10
       start_period: 30s
+    restart: unless-stopped
 
   backend:
     build:
@@ -24,16 +26,19 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_SERVER=mssql
-      - DB_NAME=${DB_NAME}
-      - PORT=3001
       - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
       - AZURE_TENANT_ID=${AZURE_TENANT_ID}
       - AZURE_AUDIENCE=${AZURE_AUDIENCE}
       - AZURE_AUDIENCE_WITH_SCOPE=${AZURE_AUDIENCE_WITH_SCOPE}
       - AZURE_ISSUER=${AZURE_ISSUER}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SERVER=mssql
+      - DB_NAME=${DB_NAME}
+      - NODE_ENV=production
+      - PORT=3001
+      - LOG_LEVEL=info
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -41,23 +46,25 @@ services:
       mssql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
+      - "80:80"
     environment:
-      - VITE_API_BASE_URL=http://localhost:3001
       - VITE_AZURE_TENANT_ID=${VITE_AZURE_TENANT_ID}
       - VITE_AZURE_CLIENT_ID=${VITE_AZURE_CLIENT_ID}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
       - VITE_API_SCOPE=${VITE_API_SCOPE}
+      - VITE_APP_VERSION=${VITE_APP_VERSION}
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -65,11 +72,12 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5173/"]
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    restart: unless-stopped
 
 volumes:
-  mssql-data:
+  mssql-prod-data:

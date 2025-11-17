@@ -1,0 +1,62 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || 'production' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+          
+      - name: Run tests
+        run: |
+          cd backend && npm test
+          cd ../frontend && npm run test:run
+          
+      - name: Build Docker images
+        run: |
+          docker build -t ai-toolbox-backend:latest ./backend
+          docker build -t ai-toolbox-frontend:latest ./frontend
+          
+      - name: Deploy to production
+        run: |
+          echo "Deployment would happen here"
+          echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+          echo "This is a placeholder - implement your deployment logic"
+          # Example deployment commands:
+          # - Push to container registry
+          # - Update docker-compose on server
+          # - Run database migrations
+          # - Restart services
+          
+      - name: Health check
+        run: |
+          echo "Post-deployment health checks would go here"
+          # Example:
+          # curl -f https://your-api-domain.com/health
+          # curl -f https://your-frontend-domain.com

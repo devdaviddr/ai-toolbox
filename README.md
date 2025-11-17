@@ -86,33 +86,168 @@ cd ..
 
 ### 2. Environment Setup
 
-Create `.env` file in the backend directory (optional - defaults are provided):
+Create a `.env` file in the project root directory:
 
 ```bash
-cd backend
+# Create root .env file for Docker Compose
 cat > .env << EOF
-NODE_ENV=development
-PORT=3001
-LOG_LEVEL=info
+# Database Configuration
 DB_USER=sa
 DB_PASSWORD=Password123!
 DB_SERVER=localhost
 DB_NAME=ai_toolbox_db
+
+# Azure AD Configuration (replace with your actual values)
+AZURE_CLIENT_ID=your-azure-client-id
+AZURE_TENANT_ID=your-azure-tenant-id
+AZURE_AUDIENCE=api://your-azure-client-id
+AZURE_AUDIENCE_WITH_SCOPE=api://your-api-client-id/access_as_user
+AZURE_ISSUER=https://login.microsoftonline.com/your-tenant-id/v2.0
+
+# Frontend Azure AD Configuration
+VITE_AZURE_TENANT_ID=your-azure-tenant-id
+VITE_AZURE_CLIENT_ID=your-azure-client-id
+VITE_API_SCOPE=api://your-api-client-id/access_as_user
 EOF
 ```
 
-### 3. Start Local Services (Optional - with Docker)
+**Security Note**: Never commit `.env` files to version control. The project includes `.env` files in `.gitignore`.
 
+### 3. Azure AD Setup (Production)
+
+For production deployment, you need to configure Azure Active Directory authentication:
+
+#### Step 1: Create Azure AD Application Registration
+
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Navigate to **Azure Active Directory** > **App registrations**
+3. Click **New registration**
+4. Configure:
+   - **Name**: `ai-toolbox-api` (or your preferred name)
+   - **Supported account types**: Accounts in this organizational directory only
+   - **Redirect URI**: Leave blank for now
+5. Click **Register**
+
+#### Step 2: Configure API Permissions
+
+1. In your app registration, go to **API permissions**
+2. Click **Add a permission**
+3. Select **Microsoft Graph**
+4. Choose **Delegated permissions**
+5. Add these permissions:
+   - `User.Read` (Sign in and read user profile)
+   - `openid` (Sign users in)
+   - `profile` (View users' basic profile)
+   - `email` (View users' email address)
+
+#### Step 3: Expose API (for frontend access)
+
+1. Go to **Expose an API** in your app registration
+2. Set **Application ID URI**: `api://<your-client-id>`
+3. Add a scope:
+   - **Scope name**: `access_as_user`
+   - **Who can consent**: Admins and users
+   - **Admin consent display name**: Access ai-toolbox as user
+   - **Admin consent description**: Allows the app to access ai-toolbox on behalf of the signed-in user
+   - **User consent display name**: Access ai-toolbox
+   - **User consent description**: Allows the app to access ai-toolbox on your behalf
+
+#### Step 4: Create Frontend App Registration
+
+1. Create a second app registration for the frontend:
+   - **Name**: `ai-toolbox-frontend`
+   - **Supported account types**: Accounts in this organizational directory only
+   - **Redirect URI**: `http://localhost:5173` (for development) and your production URL
+
+2. Configure permissions to access the API:
+   - Go to **API permissions**
+   - Click **Add a permission** > **My APIs**
+   - Select your `ai-toolbox-api` app
+   - Add the `access_as_user` scope
+
+#### Step 5: Configure Environment Variables
+
+Update your production environment files:
+
+**Backend (.env.production):**
 ```bash
-# Start database and backend services
-docker-compose up
+# Replace with your actual values from Azure AD
+AZURE_CLIENT_ID=your-api-app-client-id
+AZURE_TENANT_ID=your-tenant-id
+AZURE_AUDIENCE=api://your-api-app-client-id
+AZURE_AUDIENCE_WITH_SCOPE=api://your-api-app-client-id/access_as_user
+AZURE_ISSUER=https://login.microsoftonline.com/your-tenant-id/v2.0
 
-# In a new terminal, start frontend
-cd frontend
-npm run dev
+# Database and other settings...
+DB_USER=sa
+DB_PASSWORD=your-secure-password
+DB_SERVER=your-db-server
+DB_NAME=ai_toolbox_db
 ```
 
-**Note**: You don't need Docker to run tests - they use mocked database.
+**Frontend (.env.production):**
+```bash
+VITE_AZURE_TENANT_ID=your-tenant-id
+VITE_AZURE_CLIENT_ID=your-frontend-app-client-id
+VITE_API_BASE_URL=https://your-api-domain.com
+VITE_API_SCOPE=api://your-api-app-client-id/access_as_user
+```
+
+#### Step 6: Production Deployment
+
+Use the production docker-compose file:
+
+```bash
+# Set environment variables (recommended approach)
+export AZURE_CLIENT_ID=your-api-app-client-id
+export AZURE_TENANT_ID=your-tenant-id
+export DB_PASSWORD=your-secure-password
+# ... set all required variables
+
+# Deploy with production compose
+docker-compose -f docker-compose.prod.yml up -d
+
+# Or use environment files
+cp .env .env.production
+# Edit .env.production with production values
+docker-compose --env-file .env.production -f docker-compose.prod.yml up -d
+```
+
+#### Current Working Configuration
+
+The application currently uses these Azure AD settings (replace with your values):
+
+```bash
+# Backend Azure AD Configuration
+AZURE_CLIENT_ID=eea281fe-41da-4ebb-8182-4b4070c221aa
+AZURE_TENANT_ID=680ffb06-000e-46a1-a455-ab68252c398d
+AZURE_AUDIENCE=api://eea281fe-41da-4ebb-8182-4b4070c221aa
+AZURE_AUDIENCE_WITH_SCOPE=api://9214d544-1123-47ec-a6d3-97b271dc347a/access_as_user
+AZURE_ISSUER=https://login.microsoftonline.com/680ffb06-000e-46a1-a455-ab68252c398d/v2.0
+
+# Frontend Azure AD Configuration
+VITE_AZURE_TENANT_ID=680ffb06-000e-46a1-a455-ab68252c398d
+VITE_AZURE_CLIENT_ID=eea281fe-41da-4ebb-8182-4b4070c221aa
+VITE_API_SCOPE=api://9214d544-1123-47ec-a6d3-97b271dc347a/access_as_user
+```
+
+**Note**: The `AZURE_AUDIENCE_WITH_SCOPE` and `VITE_API_SCOPE` use a different client ID (`9214d544-1123-47ec-a6d3-97b271dc347a`) which should be your API app registration's client ID for the scope definition.
+
+### 4. Start Local Services (with Docker)
+
+```bash
+# Start all services with environment variables from .env file
+docker-compose up
+
+# View logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# Stop services
+docker-compose down
+```
+
+**Environment Variables**: Docker Compose automatically loads variables from the root `.env` file. Sensitive values like database passwords and Azure AD credentials are now properly externalized and not hardcoded in the compose file.
 
 ### 4. Access the Application
 
@@ -519,11 +654,17 @@ docker-compose down
 
 ## 🎯 Next Steps
 
+- [x] **Azure AD User Management**: Complete authentication system with automatic database sync
+- [x] **Container Environment**: Full-stack Docker deployment with health checks
+- [x] **Database Schema**: MSSQL users table with proper indexing and constraints
+- [x] **API Endpoints**: User sync, profile management, and audit logging
+- [x] **Frontend Integration**: MSAL authentication with user profile display
+- [x] **Production Configuration**: Environment files and deployment templates
 - [ ] Set up CI/CD pipeline (GitHub Actions)
-- [ ] Add authentication endpoints
-- [ ] Implement E2E tests with docker-compose
-- [ ] Add performance monitoring
-- [ ] Set up code coverage reporting
+- [ ] Add performance monitoring and alerting
+- [ ] Implement comprehensive E2E test suite
+- [ ] Add API rate limiting and security headers
+- [ ] Set up log aggregation and monitoring dashboard
 
 ---
 

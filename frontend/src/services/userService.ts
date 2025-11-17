@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { useAuth } from '../hooks/useAuth';
 
 export interface User {
   oid: string;
@@ -22,23 +21,12 @@ class UserService {
     },
   });
 
-  constructor() {
-    // Add request interceptor for auth tokens
-    this.api.interceptors.request.use(async (config) => {
-      const { getAccessToken } = useAuth();
-      try {
-        const token = await getAccessToken();
-        config.headers.Authorization = `Bearer ${token}`;
-      } catch (error) {
-        console.warn('Failed to get access token for API request:', error);
-      }
-      return config;
-    });
-  }
-
-  async syncUser(): Promise<User> {
+  async syncUser(getAccessToken: () => Promise<string>): Promise<User> {
     try {
-      const response = await this.api.post('/users/sync');
+      const token = await getAccessToken();
+      const response = await this.api.post('/users/sync', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       return response.data.user;
     } catch (error) {
       console.error('User sync failed:', error);
@@ -46,9 +34,12 @@ class UserService {
     }
   }
 
-  async getCurrentUser(): Promise<User> {
+  async getCurrentUser(getAccessToken: () => Promise<string>): Promise<User> {
     try {
-      const response = await this.api.get('/users/me');
+      const token = await getAccessToken();
+      const response = await this.api.get('/users/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       return response.data;
     } catch (error) {
       console.error('Failed to get current user:', error);
@@ -56,9 +47,12 @@ class UserService {
     }
   }
 
-  async getUserById(oid: string): Promise<User> {
+  async getUserById(oid: string, getAccessToken: () => Promise<string>): Promise<User> {
     try {
-      const response = await this.api.get(`/users/${oid}`);
+      const token = await getAccessToken();
+      const response = await this.api.get(`/users/${oid}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       return response.data;
     } catch (error) {
       console.error('Failed to get user by ID:', error);

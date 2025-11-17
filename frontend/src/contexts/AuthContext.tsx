@@ -29,72 +29,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
        // Check if we have valid accounts before trying to sync
        const accounts = msalInstance.getAllAccounts();
        if (accounts.length === 0) {
-         console.log('No authenticated accounts, using development sync');
-         // Use development endpoint when not authenticated
-         // Use stable dev user OID so it gets reused (not a new one each time)
-         const mockUserData = {
-           oid: 'dev-user-000',
-           name: 'Development User',
-           email: 'dev@example.com',
-           preferred_username: 'dev@example.com',
-           tenant_id: 'dev-tenant',
-           roles: ['user']
-         };
-
-         const response = await fetch('http://localhost:3001/users/sync-dev', {
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json',
-           },
-           body: JSON.stringify(mockUserData),
-         });
-
-         if (!response.ok) {
-           throw new Error(`HTTP error! status: ${response.status}`);
-         }
-
-         const data = await response.json();
-         setUserProfile(data.user);
+         console.log('No authenticated accounts - skipping user sync');
+         // Don't use dev endpoint - require real authentication
          return;
        }
 
        // Try to get access token for authenticated users
-       try {
-         const token = await getAccessToken();
-         // Successfully got token, use authenticated sync
-         const syncedUser = await userService.syncUser(() => Promise.resolve(token));
-         setUserProfile(syncedUser);
-       } catch (error) {
-         console.log('Token acquisition failed, falling back to dev endpoint:', error);
-         // Fallback to dev endpoint if token acquisition fails
-         // Use stable dev user OID so it gets reused
-         const mockUserData = {
-           oid: 'dev-user-000',
-           name: 'Development User',
-           email: 'dev@example.com',
-           preferred_username: 'dev@example.com',
-           tenant_id: 'dev-tenant',
-           roles: ['user']
-         };
-
-         const response = await fetch('http://localhost:3001/users/sync-dev', {
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json',
-           },
-           body: JSON.stringify(mockUserData),
-         });
-
-         if (!response.ok) {
-           throw new Error(`HTTP error! status: ${response.status}`);
-         }
-
-         const data = await response.json();
-         setUserProfile(data.user);
-       }
+       const token = await getAccessToken();
+       console.log('Got access token, syncing user...');
+       
+       // Successfully got token, use authenticated sync
+       const syncedUser = await userService.syncUser(() => Promise.resolve(token));
+       setUserProfile(syncedUser);
+       console.log('User synced successfully:', syncedUser);
      } catch (error) {
-       console.warn('User sync failed:', error);
-       // Don't throw - sync failures shouldn't break the app
+       console.error('User sync failed:', error);
+       // Don't throw - sync failures shouldn't break the app, but DO log them
      }
    };
 
@@ -127,8 +77,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
    const login = async () => {
      const loginRequest = {
-       // Include both Graph scopes (for user profile) and API scopes (for backend access)
-       scopes: [...graphScopes, ...apiScopes],
+       // Use only API scopes, not Graph scopes
+       scopes: apiScopes,
        prompt: 'select_account',
      };
 

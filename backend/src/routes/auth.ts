@@ -76,8 +76,9 @@ function getConfig() {
 function getJwksClient() {
   if (!jwksClientInstance) {
     const cfg = getConfig();
+    // Use /common endpoint to accept tokens from both specific tenant and multi-tenant scenarios
     jwksClientInstance = jwksClient({
-      jwksUri: `https://login.microsoftonline.com/${cfg.AZURE_TENANT_ID}/discovery/v2.0/keys`,
+      jwksUri: `https://login.microsoftonline.com/common/discovery/v2.0/keys`,
     });
   }
   return jwksClientInstance;
@@ -106,21 +107,69 @@ export async function validateAzureToken(req: AuthRequest, res: Response, next: 
     const token = authHeader.substring(7);
     const cfg = getConfig();
 
-    // Verify token
+    // First, decode the token without verification to inspect its claims
+    const decoded = jwt.decode(token, { complete: true });
+    
+    if (!decoded) {
+      logger.error('Token decode failed', { error: 'Could not decode token' });
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const tokenIssuer = (decoded.payload as any).iss;
+    const tokenAudience = (decoded.payload as any).aud;
+    
+    logger.debug('Token claims', { 
+      issuer: tokenIssuer, 
+      audience: tokenAudience,
+      expectedIssuer: cfg.AZURE_ISSUER,
+      expectedAudiences: [cfg.AZURE_AUDIENCE, cfg.AZURE_AUDIENCE_WITH_SCOPE]
+    });
+
+    // Check if audience matches
+    const audienceMatch = Array.isArray(tokenAudience) 
+      ? tokenAudience.some(aud => [cfg.AZURE_AUDIENCE, cfg.AZURE_AUDIENCE_WITH_SCOPE].includes(aud))
+      : [cfg.AZURE_AUDIENCE, cfg.AZURE_AUDIENCE_WITH_SCOPE].includes(tokenAudience);
+
+    if (!audienceMatch) {
+      logger.error('Token audience validation failed', { 
+        tokenAudience, 
+        expectedAudiences: [cfg.AZURE_AUDIENCE, cfg.AZURE_AUDIENCE_WITH_SCOPE]
+      });
+      return res.status(401).json({ error: 'Invalid token audience' });
+    }
+
+    // Verify token with relaxed issuer validation - accept both v1 and v2 endpoints
     jwt.verify(
       token,
       getKey,
       {
-        issuer: cfg.AZURE_ISSUER,
+        // Accept multiple Azure AD issuer formats:
+        // - v2.0 with specific tenant
+        // - v2.0 with /common (multi-tenant)
+        // - v1.0 with sts.windows.net (legacy)
+        issuer: [
+          cfg.AZURE_ISSUER,
+          `https://login.microsoftonline.com/common/v2.0`,
+          `https://login.microsoftonline.com/${cfg.AZURE_TENANT_ID}/v2.0`,
+          `https://sts.windows.net/${cfg.AZURE_TENANT_ID}/`,
+        ],
         audience: [cfg.AZURE_AUDIENCE, cfg.AZURE_AUDIENCE_WITH_SCOPE],
       },
-      (err: any, decoded: any) => {
+      (err: any, verified: any) => {
         if (err) {
-          logger.error('Token validation failed', { error: err.message });
+          logger.error('Token verification failed', { 
+            error: err.message,
+            tokenIssuer,
+            expectedIssuers: [
+              cfg.AZURE_ISSUER,
+              `https://login.microsoftonline.com/common/v2.0`,
+              `https://sts.windows.net/${cfg.AZURE_TENANT_ID}/`
+            ]
+          });
           return res.status(401).json({ error: 'Invalid token' });
         }
 
-        req.user = decoded;
+        req.user = verified;
         next();
       }
     );

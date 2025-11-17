@@ -55,5 +55,5 @@ if (import.meta.env.DEV) {
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
-export const graphScopes = ['https://graph.microsoft.com/User.Read'];
+export const graphScopes = []; // Not needed for API access
 export const apiScopes = [import.meta.env.VITE_API_SCOPE || 'api://localhost:3001/.default'].filter(Boolean);

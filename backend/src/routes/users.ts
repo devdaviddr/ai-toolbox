@@ -87,30 +87,31 @@ router.post('/sync', validateAzureToken, async (req: AuthRequest, res: Response)
         req
       );
 
-      logger.info('New user created', { oid, email: userData.email });
-    } else {
-      // Update existing user
-      await transaction
-        .request()
-        .input('oid', sql.NVarChar, oid)
-        .input('claims', sql.NVarChar, JSON.stringify(userData.claims))
-        .input('last_login', sql.DateTime2, userData.last_login)
-        .input('updated_at', sql.DateTime2, userData.updated_at)
-        .query(
-          'UPDATE users SET claims = @claims, last_login = @last_login, updated_at = @updated_at WHERE oid = @oid'
-        );
+       logger.info('New user created', { oid, email: userData.email });
+     } else {
+       // Update existing user
+       await transaction
+         .request()
+         .input('oid', sql.NVarChar, oid)
+         .input('roles', sql.NVarChar, JSON.stringify(userData.roles))
+         .input('claims', sql.NVarChar, JSON.stringify(userData.claims))
+         .input('last_login', sql.DateTime2, userData.last_login)
+         .input('updated_at', sql.DateTime2, userData.updated_at)
+         .query(
+           'UPDATE users SET roles = @roles, claims = @claims, last_login = @last_login, updated_at = @updated_at WHERE oid = @oid'
+         );
 
-      logAuditEvent(
-        AuditEventType.USER_UPDATED,
-        {
-          userId: oid,
-          userEmail: userData.email,
-          lastLogin: userData.last_login,
-        },
-        req
-      );
+       logAuditEvent(
+         AuditEventType.USER_UPDATED,
+         {
+           userId: oid,
+           userEmail: userData.email,
+           lastLogin: userData.last_login,
+         },
+         req
+       );
 
-      logger.info('Existing user updated', { oid, email: userData.email });
+       logger.info('Existing user updated', { oid, email: userData.email });
     }
 
     await transaction.commit();
@@ -209,20 +210,21 @@ router.post('/sync-dev', async (req: Request, res: Response) => {
           VALUES (@oid, @name, @email, @preferred_username, @tenant_id, @roles, @claims, @first_login, @last_login, @created_at, @updated_at)
         `);
 
-      logger.info('New test user created', { oid, email: userData.email });
-    } else {
-      // Update existing user
-      await transaction
-        .request()
-        .input('oid', sql.NVarChar, oid)
-        .input('claims', sql.NVarChar, JSON.stringify(userData.claims))
-        .input('last_login', sql.DateTime2, userData.last_login)
-        .input('updated_at', sql.DateTime2, userData.updated_at)
-        .query(
-          'UPDATE users SET claims = @claims, last_login = @last_login, updated_at = @updated_at WHERE oid = @oid'
-        );
+       logger.info('New test user created', { oid, email: userData.email });
+     } else {
+       // Update existing user
+       await transaction
+         .request()
+         .input('oid', sql.NVarChar, oid)
+         .input('roles', sql.NVarChar, JSON.stringify(userData.roles))
+         .input('claims', sql.NVarChar, JSON.stringify(userData.claims))
+         .input('last_login', sql.DateTime2, userData.last_login)
+         .input('updated_at', sql.DateTime2, userData.updated_at)
+         .query(
+           'UPDATE users SET roles = @roles, claims = @claims, last_login = @last_login, updated_at = @updated_at WHERE oid = @oid'
+         );
 
-      logger.info('Existing test user updated', { oid, email: userData.email });
+       logger.info('Existing test user updated', { oid, email: userData.email });
     }
 
     await transaction.commit();

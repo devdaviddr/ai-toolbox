@@ -43,7 +43,7 @@ const authCorsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With'],
+  allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With', 'x-id-token'],
   maxAge: 86400, // 24 hours
 };
 
@@ -57,7 +57,7 @@ const generalCorsOptions = {
       : process.env.ALLOWED_ORIGINS?.split(',') || false,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-id-token'],
 };
 
 app.use(cors(generalCorsOptions));

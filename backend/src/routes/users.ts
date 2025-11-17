@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { Response, Request } from 'express';
 import sql from 'mssql';
+import * as jwt from 'jsonwebtoken';
 import { validateAzureToken, type AuthRequest } from './auth.js';
 import logger from '../logger.js';
 import { auditAuthMiddleware, AuditEventType, logAuditEvent } from '../middleware/audit.js';

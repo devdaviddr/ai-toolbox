@@ -32,6 +32,27 @@ router.post('/sync', validateAzureToken, async (req: AuthRequest, res: Response)
       return res.status(400).json({ error: 'OID is required in token claims' });
     }
 
+    // Try to extract roles from ID token if provided
+    let idTokenClaims: any = null;
+    const idTokenHeader = req.headers['x-id-token'] as string;
+    if (idTokenHeader) {
+      try {
+        const decoded = jwt.decode(idTokenHeader, { complete: true });
+        idTokenClaims = decoded?.payload;
+        logger.debug('ID token claims extracted', { roles: idTokenClaims?.roles });
+      } catch (error) {
+        logger.warn('Failed to decode ID token from header', { error });
+      }
+    }
+
+    // Log the claims to debug role extraction
+    logger.info('User sync called', {
+      oid,
+      accessTokenRoles: claims.roles,
+      idTokenRoles: idTokenClaims?.roles,
+      allAccessTokenKeys: Object.keys(claims),
+    });
+
     await transaction.begin();
 
     // Check if user exists
@@ -46,7 +67,8 @@ router.post('/sync', validateAzureToken, async (req: AuthRequest, res: Response)
       email: claims.preferred_username || claims.upn || `${oid}@azuread.local`,
       preferred_username: claims.preferred_username,
       tenant_id: claims.tid,
-      roles: claims.roles || [],
+      // Use roles from ID token if available, otherwise from access token
+      roles: idTokenClaims?.roles || claims.roles || [],
       claims,
       last_login: new Date(),
       updated_at: new Date(),

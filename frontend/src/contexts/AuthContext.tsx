@@ -39,7 +39,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
        console.log('Got access token, syncing user...');
        
        // Successfully got token, use authenticated sync
-       const syncedUser = await userService.syncUser(() => Promise.resolve(token));
+       const syncedUser = await userService.syncUser(
+         () => Promise.resolve(token),
+         getIdToken
+       );
        setUserProfile(syncedUser);
        console.log('User synced successfully:', syncedUser);
      } catch (error) {
@@ -108,6 +111,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
        // Clear user state on token failure
        setUser(null);
        throw error;
+     }
+   };
+
+   const getIdToken = async (): Promise<string | null> => {
+     try {
+       const accounts = msalInstance.getAllAccounts();
+       if (accounts.length === 0) {
+         return null;
+       }
+
+       // Get the ID token from the account - it's stored in the token cache
+       // The ID token contains the roles claim
+       const request = {
+         scopes: ['openid', 'profile'],
+         account: accounts[0],
+         forceRefresh: false,
+       };
+
+       const response = await msalInstance.acquireTokenSilent(request);
+       // The ID token is available in the response
+       return (response as any).idToken || null;
+     } catch (error) {
+       console.warn('Could not get ID token:', error);
+       return null;
      }
    };
 

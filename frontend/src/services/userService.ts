@@ -21,12 +21,25 @@ class UserService {
     },
   });
 
-  async syncUser(getAccessToken: () => Promise<string>): Promise<User> {
+  async syncUser(getAccessToken: () => Promise<string>, getIdToken?: () => Promise<string | null>): Promise<User> {
     try {
       const token = await getAccessToken();
-      const response = await this.api.post('/users/sync', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      
+      // Try to get ID token which contains roles
+      let headers: any = { Authorization: `Bearer ${token}` };
+      if (getIdToken) {
+        try {
+          const idToken = await getIdToken();
+          if (idToken) {
+            headers['x-id-token'] = idToken;
+          }
+        } catch (error) {
+          console.warn('Could not get ID token:', error);
+          // Continue without ID token - roles may be in access token
+        }
+      }
+      
+      const response = await this.api.post('/users/sync', {}, { headers });
       return response.data.user;
     } catch (error) {
       console.error('User sync failed:', error);

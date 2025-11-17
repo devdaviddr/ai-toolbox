@@ -117,10 +117,14 @@ export async function validateAzureToken(req: AuthRequest, res: Response, next: 
 
     const tokenIssuer = (decoded.payload as any).iss;
     const tokenAudience = (decoded.payload as any).aud;
+    const tokenScopes = (decoded.payload as any).scp;
+    const tokenRoles = (decoded.payload as any).roles;
     
     logger.debug('Token claims', { 
       issuer: tokenIssuer, 
       audience: tokenAudience,
+      scopes: tokenScopes,
+      roles: tokenRoles,
       expectedIssuer: cfg.AZURE_ISSUER,
       expectedAudiences: [cfg.AZURE_AUDIENCE, cfg.AZURE_AUDIENCE_WITH_SCOPE]
     });
